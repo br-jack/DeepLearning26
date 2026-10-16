@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import time
 from multiprocessing import cpu_count
 from typing import Union, NamedTuple
@@ -78,6 +76,7 @@ if torch.cuda.is_available():
 else:
     DEVICE = torch.device("cpu")
 
+
 def main(args):
     transform = transforms.ToTensor()
     args.dataset_root.mkdir(parents=True, exist_ok=True)
@@ -105,6 +104,7 @@ def main(args):
     model = CNN(height=32, width=32, channels=3, class_count=10)
     criterion = nn.CrossEntropyLoss()
 
+    ## TASK 11: Define the optimizer
     optimizer = torch.optim.SGD(params=model.parameters(), lr=args.learning_rate)
 
     log_dir = get_summary_writer_log_dir(args)
@@ -340,4 +340,4 @@ def get_summary_writer_log_dir(args: argparse.Namespace) -> str:
 
 
 if __name__ == "__main__":
-    main(parser.parse_args())  
+    main(parser.parse_args()) 
