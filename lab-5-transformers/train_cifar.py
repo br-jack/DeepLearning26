@@ -175,8 +175,6 @@ class CIFAR_Transformer(nn.Module):
         
         self.fc1 = nn.Linear(192, 10)
         
-
-
     def forward(self, images: torch.Tensor) -> torch.Tensor:
         #TASKS 3.2, 7, 8, 9.2, 10, 11.2
         x = images # Update this with forward pass
@@ -227,9 +225,6 @@ class Trainer:
 
 
                 logits = self.model.forward(batch)
-
-                #TASK 4
-                sys.exit()
 
                 loss = self.criterion(logits, labels)
 
@@ -361,8 +356,9 @@ def get_summary_writer_log_dir(args: argparse.Namespace) -> str:
 
 
 def patchify(batch: torch.Tensor, x_size: int, y_size: int):
-    #TASK 1
-    batch = torch.nn.Unfold([x_size,y_size], dilation=1, padding=0, stride=1)
+    uf = torch.nn.Unfold((x_size, y_size), dilation=1, padding=0, stride=(x_size, y_size))
+    batch = uf(batch)
+    batch = batch.transpose(1, 2)
     return batch
 
 
