@@ -164,13 +164,26 @@ class CIFAR_Transformer(nn.Module):
         assert width % patch_size[0] == 0 and height % patch_size[1] == 0
         self.class_count = class_count
         self.n_heads = n_heads
-        #TASKS 2, 3.1, 7, 8, 9.1, 11.1
- 
+        self.patch_size = patch_size
+        #TASKS 7, 8, 9.1, 11.1
+
+        self.encoder = nn.TransformerEncoderLayer(
+                    nhead=1,
+                    d_model=192,
+                    batch_first=False
+                )
+        
+        self.fc1 = nn.Linear(192, 10)
+        
 
 
     def forward(self, images: torch.Tensor) -> torch.Tensor:
-        #TASKS 1, 2, 3.2, 7, 8, 9.2, 10, 11.2
+        #TASKS 3.2, 7, 8, 9.2, 10, 11.2
         x = images # Update this with forward pass
+        x = patchify(x, self.patch_size[0], self.patch_size[1])
+        x = self.encoder(x)
+        x = (x - x.mean(axis=0)) / x.std(axis=0)
+        x = self.fc1(x)
         return x
 
 
@@ -349,6 +362,7 @@ def get_summary_writer_log_dir(args: argparse.Namespace) -> str:
 
 def patchify(batch: torch.Tensor, x_size: int, y_size: int):
     #TASK 1
+    batch = torch.nn.Unfold([x_size,y_size], dilation=1, padding=0, stride=1)
     return batch
 
 
