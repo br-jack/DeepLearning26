@@ -105,11 +105,11 @@ def main(args):
         pin_memory=True,
     )
 
-    model = CIFAR_Transformer(height=32, width=32, channels=3, patch_size=(8, 8), class_count=10)
+    model = CIFAR_Transformer(height=32, width=32, channels=3, patch_size=(8, 8), class_count=10, n_heads=args.num_heads)
 
     criterion = nn.CrossEntropyLoss()
 
-    optimizer = None
+    optimizer = torch.optim.SGD(params=model.parameters(), lr=args.learning_rate)
 
     log_dir = get_summary_writer_log_dir(args)
     print(f"Writing logs to {log_dir}")
@@ -166,22 +166,22 @@ class CIFAR_Transformer(nn.Module):
         self.n_heads = n_heads
         self.patch_size = patch_size
         #TASKS 7, 8, 9.1, 11.1
+        d_model = channels * patch_size[0] * patch_size[1] 
 
         self.encoder = nn.TransformerEncoderLayer(
-                    nhead=1,
-                    d_model=192,
-                    batch_first=False
+                    d_model=d_model,
+                    nhead=n_heads,
+                    batch_first=True
                 )
-        
-        self.fc1 = nn.Linear(192, 10)
-        
+
+        self.fc1 = nn.Linear(d_model, class_count)
+
     def forward(self, images: torch.Tensor) -> torch.Tensor:
-        #TASKS 3.2, 7, 8, 9.2, 10, 11.2
-        x = images # Update this with forward pass
-        x = patchify(x, self.patch_size[0], self.patch_size[1])
-        x = self.encoder(x)
-        x = (x - x.mean(axis=0)) / x.std(axis=0)
-        x = self.fc1(x)
+        #TASKS 7, 8, 9.2, 10, 11.2
+        x = patchify(images, self.patch_size[0], self.patch_size[1])  
+        x = self.encoder(x)                                            
+        x = x.mean(dim=1)                                             
+        x = self.fc1(x)                                              
         return x
 
 
